@@ -1,0 +1,102 @@
+
+table {
+	/*
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+	*/
+	border-collapse: collapse;
+}
+#info {
+	top:80;
+	left:435;
+	position: absolute;
+	
+}
+
+#machine {
+	position: relative;
+	background-image: url(images/background640x520.png);
+	width: 640px;
+	height: 520px;
+}
+
+#payout {
+	color:#c6c0ca;
+	margin-top:5px;
+}
+
+#payout label {
+	padding-right:10px;
+}
+
+.infospan {
+	margin-right: 15px;
+	margin-top:5px;	
+}
+
+.infospan span {
+	background-color:black;
+	padding-left:5px;
+	padding-right:5px;
+	border:1px solid #c6c0ca;
+	width:40px;
+}
+
+#lines {
+	color:#c6c0ca;
+}
+
+#lines input {
+	margin-right:20px;
+}
+#lines label {
+	margin-right:25px;
+}
+
+#playForm label {
+	color:#c6c0ca;
+}
+
+/*
+#lines img{
+	width:40;
+	height:40;
+}*/
+
+.wheelDisplay {
+	/*height:180px;
+	width:60px;*/
+	overflow: hidden;
+	position: relative;
+	background-color: #ffebcd;
+}
+
+.wheel img {
+	/*height:60px;
+	width:60px;*/
+	position: relative;
+	top: 0px;	
+	display: block
+} 
+
+.wheel {
+	position: relative;
+	top:0px;
+}
+
+
+
+#spinnerDiv {
+	display: inline;
+	width: 30px;
+	height:15px;
+}
+
+#spinnerDiv input {
+	width:40px;
+}
+
+
+
+
+

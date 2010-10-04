@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html>
+<head>
+		<title>Simulation Results</title>
+		<link rel="icon" href="icons/rat.ico" type="image/x-icon" />
+		<link rel="stylesheet" href="jquery-ui-1.8.5.custom.css" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="ui.spinner.css" />
+		<link rel="stylesheet" href="poker_finn.css" type="text/css" />
+		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="jquery-ui-1.8.5.custom.min.js"></script>
+		<script type="text/javascript" src="jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="ui.spinner.js"></script>
+		<script type="text/javascript" src="jqplot.cursor.min.js"></script>
+		<script type="text/javascript" src="poker_finn.js"></script>
+		<script type="text/javascript">
+		$(document).ready(function(){
+		      $.jqplot.config.enablePlugins = true;
+		      initializeSimulationPage();
+		  });
+		</script>
+</head>
+<body>
+	<h3>Simulate what would happen playing this poker machine over a one year period.</h3>
+	<p>Each credit is worth 10 cents</p>
+	<div id = sim_options>
+		<form id=sim_optionsform>
+			<div class="sim_optionsinput">
+			<label>Simulate playing how often?</label>
+			<select id="sim_playfrequency">
+				<option value="12">once a month</option>
+				<option value="24">every couple of weeks</option>
+				<option value="50">most weeks</option>
+				<option selected="yes" value="100">twice a week</option>
+				<option value="150">three times a week</option>
+			</select>
+			</div>
+			<div class="sim_optionsinput">
+			<label>How long for each session?</label>
+			<select id="sim_sessionlength">
+				<option value="75">5 minutes</option>
+				<option value="450">30 minutes</option>
+				<option selected="yes" value="900">1 hour</option>
+				<option value="2700">3 hours</option>
+				<option value="4500">5 hours</option>
+			</select>
+			</div >
+			<div class="sim_optionsinput">
+			<label>How many lines?</label>
+			<div class="spinnerDiv"><input id="sim_numberoflines" type="text" /></div>
+			</div>
+			<div class="sim_optionsinput">
+			<label>How many credits per line?</label>
+			<div class="spinnerDiv"><input id="sim_creditsperline" type="text" /></div>
+			</div>
+			<div class="sim_optionsinput"><button class="button" type="button" onclick="runSimulation()" value="Simulate">Simulate</button></div>
+		</form>
+	</div>
+	
+	<div id="sim_result_text"></div>
+	<div id="sim_chart_lossovertime"></div>
+	
+	
+	
+</body>
+</html>

@@ -1,4 +1,18 @@
 
+#sim_options {
+	border: 4px inset gray;
+	width: 400px;
+}
+
+.sim_optionsinput {
+	padding:5px;
+}
+
+#sim_chart_lossovertime {
+	margin-top: 10px;
+}
+
+
 table {
 	/*
 	border-top:1px solid black;
@@ -47,10 +61,10 @@ table {
 }
 
 #lines input {
-	margin-right:20px;
+	margin-right:15px;
 }
 #lines label {
-	margin-right:25px;
+	margin-right:20px;
 }
 
 #playForm label {
@@ -86,13 +100,13 @@ table {
 
 
 
-#spinnerDiv {
+.spinnerDiv {
 	display: inline;
 	width: 30px;
 	height:15px;
 }
 
-#spinnerDiv input {
+.spinnerDiv input {
 	width:40px;
 }
 

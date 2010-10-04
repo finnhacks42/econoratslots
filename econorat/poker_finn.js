@@ -1,18 +1,150 @@
+var s1 = new Symbol("lion",0,[4,10,40,100]); //[0,10,20,100]
+var s2 = new Symbol("ecorat",1,[10,50,200,2000]);//[2,100,500,1500]
+var s3 = new Symbol("cactus",2,[5,10,20,100]); //[0,5,20,100]
+var s4 = new Symbol("mushroom",3,[2,10,20,100]);//[0,5,20,100]
+var s5 = new Symbol("zebra",4,[5,10,50,1000]); //changed but I can't remember the orig
+var s6 = new Symbol("tree",5,[0,5,20,100]);//[0,5,20,100]
+var s7 = new Symbol("dog1",6,[5,10,50,200]);//[0,15,50,100]
+var s8 = new Symbol("club",7,[0,0,0,0]); //you have not dealt with sequenes that start with wild properly
+var s9 = new Symbol("dog2",8,[5,10,100,500]);//[0,20,100,500]
+var s10 = new Symbol("apple",9,[2,5,10,100]); //scatter [0,2,10,50]
 
+iconSize = 60;
+wheelSet = [[s1, s4, s6, s1, s2, s3, s4, s6, s3, s1, s5, s6, s4, s3, s1, s6, s4, s9, s3, s7, s4, s3, s6, s1, s4, s7, s3, s4, s1, s3, s7, s4, s6, s1, s3, s4, s7, s6, s4, s3, s7, s1, s6, s3, s7, s1, s6, s3, s1, s7, s6, s3, s1, s4, s6, s3, s1, s10, s6, s3, s1, s10, s6, s3, s1, s10, s3, s6, s10, s6, s4, s7, s3, s8, s7, s3], [s2, s1, s7, s8, s1, s7, s2, s1, s4, s1, s7, s4, s8, s7, s4, s2, s1, s4, s7, s4, s2, s1, s4, s7, s10, s1, s7, s1, s4, s2, s9, s7, s1, s4, s10, s1, s4, s7, s1, s2, s7, s9, s1, s2, s1, s7, s4, s1, s2, s9, s7, s4, s3, s5, s1, s7, s1, s4, s5, s4, s1, s6, s1, s5, s4, s1, s6, s5, s1], [s3, s5, s6, s1, s5, s6, s7, s8, s6, s7, s5, s7, s3, s10, s9, s6, s5, s6, s7, s5, s1, s10, s3, s5, s6, s10, s3, s5, s7, s4, s5, s9, s4, s5, s6, s9, s5, s3, s6, s5, s9, s3, s5, s6, s3, s5, s9, s3, s2, s6, s9, s2, s9, s3, s6, s8, s3, s6, s2, s9, s5, s6, s2, s9, s1], [s1, s2, s6, s9, s1, s2, s6, s9, s1, s2, s6, s9, s10, s9, s1, s2, s1, s6, s1, s2, s3, s9, s1, s2, s3, s9, s1, s2, s6, s3, s4, s2, s9, s6, s7, s4, s8, s7, s4, s5, s4, s6, s5, s3, s6, s5, s9, s4, s5, s3, s4, s5, s3, s7, s4, s5, s3, s7, s4, s5, s3, s7, s7, s6], [s4, s2, s7, s1, s3, s4, s2, s7, s3, s1, s4, s5, s3, s1, s9, s7, s4, s5, s6, s1, s7, s4, s5, s3, s6, s7, s4, s5, s3, s9, s6, s7, s4, s5, s7, s9, s6, s4, s5, s3, s6, s7, s3, s6, s5, s9, s3, s9, s1, s6, s5, s9, s6, s3, s9, s1, s5, s3, s6, s1, s9, s10]];
+//only row position needs to be specfied since the column always increments by 1
+lines = [[1,1,1,1,1],[0,0,0,0,0],[2,2,2,2,2],[0,1,2,1,0],[2,1,0,1,2],[1,0,1,0,1],[1,2,1,2,1],[2,0,2,0,2],[0,2,0,2,0]];
+//holds the values currently displayed
+images = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
+      
+Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+};
+Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+};
 
-function setUpForBrowser(){
-	//deal with firefox 3.0
-	/*
-	if (CanvasRenderingContext2D.prototype.mozDrawText && !CanvasRenderingContext2D.prototype.fillText){
-		CanvasRenderingContext2D.prototype.fillText = function(text,x,y){
-			this.translate(x,y);
-			this.mozTextStyle = this.font;
-			this.mozDrawText(text);
-			this.translate(-x,-y);
-		};
+//-------------THE FUNCTIONS USED TO GENERATE THE SIMULATION PAGE -------------------------------
+
+function initializeSimulationPage(){
+	$('#sim_numberoflines').spinner({ min: 1, max: 9 });
+	$('#sim_creditsperline').spinner({ min: 1, max: 10 });
+}
+
+function runSimulation(){
+	disableButtons();
+	setTimeout(simulate,0);
+}
+
+function simulate(){
+	var gamespersession = $('#sim_sessionlength').val();
+	var sessions = $('#sim_playfrequency').val();
+	var lines = $("#sim_numberoflines").val();
+	var credits = $('#sim_creditsperline').val();
+	var dollarspercredit = 0.1;
+	var expectedCretitsLost = gamespersession*sessions*lines*credits*0.15;
+	var startdollaramount = expectedCretitsLost*dollarspercredit*1.5; //start with 1.5 times the expected loss
+	var dollaramount = startdollaramount;
+	var totals = [startdollaramount];
+	var profits = [];
+	var total = 0;
+	var win = 0;
+	var maxwin = 0;
+	for (var run = 0; run < sessions; run ++){
+		profits[run] = 0;		
+		for (var count = 0; count < gamespersession; count++){
+			win = play(credits,lines)[0];
+			if (win > maxwin){maxwin = win;}
+			profits[run] += (win - credits*lines)*dollarspercredit;			
+			total += win;
+		}
+		totals[run+1] = dollaramount + profits[run];
+		dollaramount = totals[run+1];
 	}
-	*/
+	var rtnRate = Math.round(total*100/(gamespersession*sessions*credits*lines))/100;
+	var word = "lost";
+	
+	if ((dollaramount-startdollaramount) > 0) {word = "won";}
+	$("#sim_result_text").text(
+	"I simulated playing "+sessions+" sessions of "+gamespersession+" games each."+
+	" The maximum win was $"+maxwin+
+	" but overall I "+word+" $"+(Math.abs(startdollaramount-dollaramount)).toFixed(0)+"."+
+	//" The total amount of money put through the machine was "+(lines*credits*sessions*gamespersession)+
+	" The return rate over the year was "+rtnRate);
+	
+	drawlineplot(totals,1.1*startdollaramount,sessions);
+	//drawHistogram(data);
+	enableButtons();
+}
 
+function drawlineplot(moneyOverTime,expectedMax,sessions){
+	var max = moneyOverTime.max();
+	var min = moneyOverTime.min();
+	var top = Math.max(max,expectedMax);
+	var bottom = Math.min(min,0);
+	var gap = max - min;
+	var increment = 1000;	
+	if (gap > 10000 && gap < 50000) {
+		increment = 5000;
+	} else if (gap > 50000 && gap < 100000) {
+		increment = 10000;
+	} else if (gap > 100000 && gap < 500000){
+		increment = 50000;
+	} else if (gap > 500000){
+		increment = 100000;
+	}
+
+	$('#sim_chart_lossovertime').empty();
+	yticks =  [bottom];
+	for (i = 0; i < max; i += increment){
+		yticks.push(i);
+	}
+	yticks.push(top);
+	
+	plot2 = $.jqplot('sim_chart_lossovertime', [moneyOverTime], { 
+	    title:'Losses over one year', 
+	    series:[
+	        {
+	            showMarker:false, 
+	            lineWidth:4, 
+	            shadowAngle:0, 
+	            shadowOffset:1.5, 
+	            shadowAlpha:.08, 
+	            shadowDepth:6,
+	            neighborThreshold: -1
+	        }
+	    ],
+	    
+	    axes:{
+			yaxis:{
+				min: bottom, 
+				max: top,
+				//ticks:yticks//,
+				tickOptions:{formatString:'$%d'}
+				},
+			xaxis: {
+		    	min:1,
+		    	max: sessions,
+		    	showTicks:false
+		    }
+	    },
+	    cursor: {
+			zoom:true, 
+			//clickReset:true,
+			style:'crosshair'
+		}
+	    
+	}); 
+}
+
+//----------------Functions used by the poker machine page ----------------------
+
+function redirectToSimulationPage(){
+	document.location = "file:///home/finn/workspace/testjs/simulation.html";
+	
+}
+ 
+ 
+function setUpForBrowser(){
 	if (navigator.userAgent.indexOf("Chrome") >= 0){return;} //if its chrome we are good
 	var firefox = navigator.userAgent.search("Firefox/[0-9.]{0,15}$");
 	if (firefox > -1){
@@ -20,12 +152,8 @@ function setUpForBrowser(){
 		if (version >= 3){return;}	
 	}
 	var warning = $("warning");
-	warning.innerHTML = "This application has only been tested for Chrome or Firefox 3.0 and later. If you experience problems please try one of these browsers"; 
-	
+	warning.innerHTML = "This application has only been tested for Chrome or Firefox 3.0 and later. If you experience problems please try one of these browsers"; 	
 }
-
-
-
 
 //icon should be the string icon name, and payoutArray an array [2inrow,3inrow,4inrow,5inrow]
 function Symbol(sName,iconNum,payoutArray){
@@ -46,41 +174,11 @@ function Symbol(sName,iconNum,payoutArray){
 	};		
 }
 
-var s1 = new Symbol("lion",0,[4,10,40,100]); //[0,10,20,100]
-var s2 = new Symbol("ecorat",1,[10,50,200,2000]);//[2,100,500,1500]
-var s3 = new Symbol("cactus",2,[5,10,20,100]); //[0,5,20,100]
-var s4 = new Symbol("mushroom",3,[2,10,20,100]);//[0,5,20,100]
-var s5 = new Symbol("zebra",4,[5,10,50,1000]); //changed but I can't remember the orig
-var s6 = new Symbol("tree",5,[0,5,20,100]);//[0,5,20,100]
-var s7 = new Symbol("dog1",6,[5,10,50,200]);//[0,15,50,100]
-var s8 = new Symbol("club",7,[0,0,0,0]); //you have not dealt with sequenes that start with wild properly
-var s9 = new Symbol("dog2",8,[5,10,100,500]);//[0,20,100,500]
-var s10 = new Symbol("apple",9,[2,5,10,100]); //scatter [0,2,10,50]
 
-
-
-function initialize(){
-	Array.prototype.max = function() {
-	    return Math.max.apply(null, this);
-	};
-	Array.prototype.min = function() {
-	    return Math.min.apply(null, this);
-	};
+function initializePokerMachine(){
 	setUpForBrowser();
 	initializeMachine();
 }
-
-
-//Pokermachine class
-
-iconSize = 60;
-
-wheelSet = [[s1, s4, s6, s1, s2, s3, s4, s6, s3, s1, s5, s6, s4, s3, s1, s6, s4, s9, s3, s7, s4, s3, s6, s1, s4, s7, s3, s4, s1, s3, s7, s4, s6, s1, s3, s4, s7, s6, s4, s3, s7, s1, s6, s3, s7, s1, s6, s3, s1, s7, s6, s3, s1, s4, s6, s3, s1, s10, s6, s3, s1, s10, s6, s3, s1, s10, s3, s6, s10, s6, s4, s7, s3, s8, s7, s3], [s2, s1, s7, s8, s1, s7, s2, s1, s4, s1, s7, s4, s8, s7, s4, s2, s1, s4, s7, s4, s2, s1, s4, s7, s10, s1, s7, s1, s4, s2, s9, s7, s1, s4, s10, s1, s4, s7, s1, s2, s7, s9, s1, s2, s1, s7, s4, s1, s2, s9, s7, s4, s3, s5, s1, s7, s1, s4, s5, s4, s1, s6, s1, s5, s4, s1, s6, s5, s1], [s3, s5, s6, s1, s5, s6, s7, s8, s6, s7, s5, s7, s3, s10, s9, s6, s5, s6, s7, s5, s1, s10, s3, s5, s6, s10, s3, s5, s7, s4, s5, s9, s4, s5, s6, s9, s5, s3, s6, s5, s9, s3, s5, s6, s3, s5, s9, s3, s2, s6, s9, s2, s9, s3, s6, s8, s3, s6, s2, s9, s5, s6, s2, s9, s1], [s1, s2, s6, s9, s1, s2, s6, s9, s1, s2, s6, s9, s10, s9, s1, s2, s1, s6, s1, s2, s3, s9, s1, s2, s3, s9, s1, s2, s6, s3, s4, s2, s9, s6, s7, s4, s8, s7, s4, s5, s4, s6, s5, s3, s6, s5, s9, s4, s5, s3, s4, s5, s3, s7, s4, s5, s3, s7, s4, s5, s3, s7, s7, s6], [s4, s2, s7, s1, s3, s4, s2, s7, s3, s1, s4, s5, s3, s1, s9, s7, s4, s5, s6, s1, s7, s4, s5, s3, s6, s7, s4, s5, s3, s9, s6, s7, s4, s5, s7, s9, s6, s4, s5, s3, s6, s7, s3, s6, s5, s9, s3, s9, s1, s6, s5, s9, s6, s3, s9, s1, s5, s3, s6, s1, s9, s10]]
-
-//only row position needs to be specfied since the column always increments by 1
-lines = [[1,1,1,1,1],[0,0,0,0,0],[2,2,2,2,2],[0,1,2,1,0],[2,1,0,1,2],[1,0,1,0,1],[1,2,1,2,1],[2,0,2,0,2],[0,2,0,2,0]];
-//holds the values currently displayed
-images = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
 
 function initializeMachine(){
 	var machineSize = 640;
@@ -90,9 +188,6 @@ function initializeMachine(){
 	iconSize = (machineSize - 2*machinelrborder - 5*gap)/5 ;	
 	loadWheels(wheelSet);
 	scaleMachineToSize(machineSize,machinelrborder,gap, machinetbborder);
-	//wheelSet = generateRandomWheels(imagesUsed);
-	
-	//drawHistogram([1,2,5,9,3,1]);
 }
 
 function scaleMachineToSize(sizeInPixels, machinelrborder, gap, machinetbborder){
@@ -137,7 +232,6 @@ function payoff(stopPoints,credits,lines){
 	return total;
 }
 
-
 function payoffLine(lineNo,images){
 //needs to check for things in a row and then determine what type they are to get the payout.
 	line = lines[lineNo];
@@ -154,7 +248,6 @@ function payoffLine(lineNo,images){
 	}
 	return first.payout(count);		
 }
-
 
 function getNoOfCredits(){
 	var credits = $("#spinner").val();
@@ -181,36 +274,11 @@ function enableButtons(){
 		buttons[b].disabled = false;
 	}
 }
-function startRapidPlay(){
-	disableButtons();
-	setTimeout(rapidPlay,0);
-}
 
-function rapidPlay(){
-	var lines = getNoOfLines();
-	var credits = getNoOfCredits();
-	var profits = [];
-	var total = 0;
-	var sessions = 10;
-	var repeats = 1000;
-	var win = 0;
-	for (var run = 0; run < repeats; run ++){
-		profits[run] = 0
-		for (var count = 0; count < sessions; count++){
-			win = play(credits,lines)[0];
-			profits[run] += win - credits*lines;
-			total += win;
-		}
-	}
-	var infotext = $("infotext");
-	var rtnRate = Math.round(total*100/(sessions*repeats*credits*lines))/100;	
-	infotext.innerHTML = "The above chart simulates "+repeats+ " sessions of "+sessions+ " games each. " + 
-"The return rate over all these games is: "+rtnRate;
-		
-	var data = histogram(profits,20);
-	drawHistogram(data);
-	enableButtons();
-}
+
+
+
+
 
 function play(credits,lines){
 	var stopPoints =  []
@@ -236,12 +304,6 @@ function livePlay(){
 		w.spinsLeft = count;
 		count += 4;
 	});
-	//for (var indx = 0; indx < wheels.size(); indx ++){
-	//	var w = wheels[indx];
-	//	w.stopPoint = playrun[1][indx];
-	//	w.spinsLeft = count;
-	//	count += 4;
-	//}
 	var interval = setInterval(function (){spin(wheels,interval)},5); //5
 	var money = parseInt($("#moneyamount").text())+(playrun[0]-(credits*lines));
 	$("#moneyamount").text(money);
@@ -249,7 +311,6 @@ function livePlay(){
 	$("#betamount").text(credits*lines);
 }
 
-	
 	
 function spin(wheels,interval){
 	
@@ -379,49 +440,7 @@ function histogram(data,noOfBins){
 
 
 
-/*
-function drawHistogram(valuesNlabels){
-	var values = valuesNlabels[0];
-	var labels = valuesNlabels[1];
-	var canvas = $('#plot');
-	var fw = 400;
-	var fh = 300;
-	var gap = 2;
-	canvas.attr("width",fw);
-	canvas.attr("height",fh);
-	var gw = fw - 10;
-	var gh = fh - 10;
-	//what happens if this is -ive?
-	var barwidth = gw/values.length - gap;
-	var scale = gh/values.max();
 
-	if (canvas.getContext){  
-		var ctx = canvas.getContext('2d');
-		ctx.clearRect(0,0,fw,fh);
-		ctx.strokeRect(0,0,gw,gh);
-		for (var i = 0; i<values.length; i++){
-			ctx.fillRect(i*(barwidth+gap),gh-scale*values[i],barwidth,scale*values[i]);
-			ctx.font = "6pt Arial";
-			ctx.fillText(labels[i],(barwidth+gap)*(i),fh);
-		}
-	}
-}
-
-//draws a plot
-function drawLinePlot(values){
-	var canvas = $('plot');
-	var fw = 300;
-	var fh = 200;
-	canvas.setAttribute("width",fw);
-	canvas.setAttribute("height",fh);
-	if (canvas.getContext){  
-		var ctx = canvas.getContext('2d');
-		ctx.clearRect(0,0,fw,fh);
-		ctx.strokeRect(0,0,fw,fh);
-
-	}
-}
-*/
 
 
   

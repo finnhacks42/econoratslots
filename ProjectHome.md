@@ -1,0 +1,1 @@
+This project is a simulation of a slot machine written in javascript. The goal is to create a playable video slot and allow simulation of the expected losses when the machine is played over a longer period.
